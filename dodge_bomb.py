@@ -15,7 +15,7 @@ DELTA = {
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-def check_bound(rct:pg.Rect)->tuple[bool, bool]:
+def check_bound(rct:pg.Rect) -> tuple[bool, bool]:  # 空間を入れた
     """
     引数：こうかとんRectまたは爆弾Rect
     戻り値：判定結果タプル（横方向,縦方向）
@@ -68,6 +68,23 @@ def init_bb_imgs()->tuple[list[pg.Surface],list[int]]:
         bb_imgs.append(bb_img)
     bb_accs = [a for a in range(1,11)]
     return bb_imgs,bb_accs
+
+
+def get_kk_imgs()->dict[tuple[int,int],pg.Surface]:
+    """
+    こうかとんの画像を切り替える
+    """
+    kk_dict = {
+        ( 0,0):pg.transform.rotozoom(kk_img,10,1.0),  # キー押下がない場合
+        (+5,0):pg.transform.flip(kk_img,True,False),  # 右
+        (+5,-5):pg.transform.rotozoom(pg.transform.flip(kk_img,True,False),45,1.0),  # 右上
+        ( 0,-5):pg.transform.rotozoom(pg.transform.flip(kk_img,False,False),90,1.0),  # 上
+        (-5,-5):pg.transform.rotozoom(kk_img,45,1.0),  # 左上
+        (-5,0):pg.transform.rotozoom(kk_img,10,1.0),  # 左
+        (-5,+5):pg.transform.rotozoom(kk_img,10,1.0),  # 左下
+        ( 0,+5):pg.transform.rotozoom(kk_img,10,1.0),  # 下
+        (+5,+5):pg.transform.rotozoom(kk_img,10,1.0),  # 右下
+    }
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
