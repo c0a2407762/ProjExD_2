@@ -4,7 +4,6 @@ import sys
 import pygame as pg
 
 
-
 WIDTH, HEIGHT = 1100, 650
 DELTA = {
     pg.K_UP:(0,-5),
@@ -13,6 +12,20 @@ DELTA = {
     pg.K_RIGHT:(+5,0),
 }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+def check_bound(rct:pg.Rect)->tuple[bool, bool]:
+    """
+    引数：こうかとんRectまたは爆弾Rect
+    戻り値：判定結果タプル（横方向,縦方向）
+    画面内ならTure,画面外ならFalse
+    """
+    yoko,tate = True,True
+    if rct.left < 0 or WIDTH < rct.right:  # 横方向のはみだしチェック
+        yoko = False
+    if rct.top < 0 or HEIGHT < rct.bottom:  # 縦方向のはみだしチェック
+        tate = False
+    return yoko,tate
 
 
 def main():
@@ -52,7 +65,14 @@ def main():
                 sum_mv[0] += mv[0]  # 横方向の移動量
                 sum_mv[1] += mv[1]  # 縦方向の移動量
         kk_rct.move_ip(sum_mv)
+        if check_bound(kk_rct) !=(True,True):  # 画面外なら
+            kk_rct.move_ip(-sum_mv[0],-sum_mv[1])  # 移動をなかったことにする
         screen.blit(kk_img, kk_rct)
+        yoko,tate = check_bound(bb_rct)
+        if not yoko:  # 横方向にはみ出ていたら
+            vx *= -1
+        if not tate:  # 縦方向にはみ出ていたら
+            vy *= -1
         bb_rct.move_ip(vx,vy)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
