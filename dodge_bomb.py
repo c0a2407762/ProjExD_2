@@ -55,6 +55,20 @@ def gameover(screen:pg.Surface)->None:
     time.sleep(5)  # 5秒表示
     
 
+def init_bb_imgs()->tuple[list[pg.Surface],list[int]]:
+    """
+    無限に拡大、加速するのはおかしいので10段階程度の
+    大きさの変化爆弾Surfaceのリストと加速度のリストを準備する
+    """
+    bb_imgs = []
+    for r in range(1,11):
+        bb_img = pg.Surface((20*r,20*r))  # 空のSurface
+        pg.draw.circle(bb_img,(255,0,0),(10*r,10*r),10*r)
+        bb_img.set_colorkey((0,0,0))  # 黒除去
+        bb_imgs.append(bb_img)
+    bb_accs = [a for a in range(1,11)]
+    return bb_imgs,bb_accs
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -71,6 +85,8 @@ def main():
     vx,vy = +5, +5  # 爆弾の横速度、縦速度
     clock = pg.time.Clock()
     tmr = 0
+
+    bb_imgs,bb_accs = init_bb_imgs()  # 爆弾リストと加速リスト呼び出し
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -82,6 +98,7 @@ def main():
             return
         
         screen.blit(bg_img, [0, 0]) 
+        
 
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
@@ -106,7 +123,16 @@ def main():
             vx *= -1
         if not tate:  # 縦方向にはみ出ていたら
             vy *= -1
-        bb_rct.move_ip(vx,vy)
+
+        avx = vx*bb_accs[min(tmr//500,9)]
+        bb_img = bb_imgs[min(tmr//500,9)]
+        avy = vy*bb_accs[min(tmr//500,9)]
+        bb_img = bb_imgs[min(tmr//500,9)]
+
+        bb_rct.width = bb_img.get_rect().width
+        bb_rct.height = bb_img.get_rect().height  # 爆弾の大きさ更新
+
+        bb_rct.move_ip(avx,avy)
         screen.blit(bb_img, bb_rct)
         pg.display.update()
         tmr += 1
